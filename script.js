@@ -1,234 +1,238 @@
-/* ---------- Color Pop Challenge - Complete Script ---------- */
-(function () {
-  // --- Config ---
-  const colors = ["red", "blue", "green", "yellow", "purple", "orange"];
-  const fontColors = ["black", "white", "red", "blue", "green", "orange"];
-  let score = 0;
-  let round = 1;
-  let timer = 7;                // ⏱ Start with 7 seconds
-  let interval = null;
-  let correctColor = null;
-  let gameActive = true;
-  let totalBalloons = 25;
-  let remainingTargetBalloons = 0; // 🧮 Track remaining correct-color balloons
+(() => {
+  const colors = ['red','blue','green','yellow','purple','orange','pink'];
+  const colorHex = { red:'#ff4d6d', blue:'#3a86ff', green:'#20c997', yellow:'#ffd166', purple:'#9b5de5', orange:'#ff8c42', pink:'#ff70a6' };
 
-  // --- DOM Elements ---
-  const balloonContainer = document.getElementById("balloonContainer");
-  const targetColor = document.getElementById("targetColor");
-  const scoreDisplay = document.getElementById("score");
-  const loadingScreen = document.getElementById("loadingScreen");
-  const timerBar = document.getElementById("timerBar");
-  
-  // --- Helpers ---
-  function showLoading(cb) {
-    if (!loadingScreen) return cb();
-    loadingScreen.style.display = "flex";
-    setTimeout(() => {
-      loadingScreen.style.display = "none";
-      cb();
-    }, 5000);
+  let score = 0, round = 1, level = 1, lives = 3;
+  let streak = 0, bestStreak = 0, comboMultiplier = 1;
+  let timerSeconds = 8, timeLeft = 8;
+  let interval = null, nextRoundTimer = null;
+  let correctColor = '', targetRemaining = 0;
+  let paused = false, gameActive = true, doublePoints = false;
+  let shieldActive = false, frozen = false;
+  let powerups = { freeze: 2, double: 2, shield: 1 };
+  let highScore = Number(localStorage.getItem('rainbowPopHighScore') || 0);
+  let badges = JSON.parse(localStorage.getItem('rainbowPopBadges') || '[]');
+
+  const $ = id => document.getElementById(id);
+  const container = $('balloonContainer');
+
+  function syncHUD() {
+    $('score').textContent = score;
+    $('streak').textContent = streak;
+    $('lives').textContent = lives;
+    $('highScore').textContent = Math.max(highScore, score);
+    $('level').textContent = level;
+    $('round').textContent = round;
+    $('freezeCount').textContent = powerups.freeze;
+    $('doubleCount').textContent = powerups.double;
+    $('shieldCount').textContent = powerups.shield;
   }
 
-  // ---------- Start a round ----------
+  function toast(message, type = '') {
+    const el = $('messageToast');
+    el.textContent = message;
+    el.className = `toast show ${type}`;
+    clearTimeout(toast.timer);
+    toast.timer = setTimeout(() => el.className = 'toast', 1500);
+  }
+
   function startRound() {
-    if (!gameActive) return;
-
-    if (round > 10) {
-      alert("🎉 Level Up! Difficulty Increased!");
-      round = 1;
-      timer = Math.max(5, timer - 1);           // reduce timer
-      totalBalloons = (totalBalloons || 25) + 5; // add more balloons
-    }
-
-    showLoading(() => {
-      generateBalloons();
-      startTimer();
-    });
-  }
-
-  // ---------- Generate balloons ----------
-  function generateBalloons() {
-    balloonContainer.innerHTML = "";
-    balloonContainer.style.position = "relative";
+    if (!gameActive || paused) return;
+    clearInterval(interval);
+    clearTimeout(nextRoundTimer);
+    container.innerHTML = '';
 
     correctColor = colors[Math.floor(Math.random() * colors.length)];
+    const twist = round % 4 === 0 || Math.random() < 0.3;
+    const textColor = twist ? colors.filter(c => c !== correctColor)[Math.floor(Math.random() * (colors.length - 1))] : correctColor;
 
-    // --- Twist logic (font mismatch, flash, flip, etc.) ---
-    let fontColor;
-    let twistRound = false;
-    if (round % 4 === 0 || Math.random() < 0.25) {
-      twistRound = true;
-      do {
-        fontColor = fontColors[Math.floor(Math.random() * fontColors.length)];
-      } while (fontColor === correctColor);
+    $('targetColor').textContent = correctColor.toUpperCase();
+    $('targetColor').style.color = colorHex[textColor];
+    $('challengeText').textContent = twist
+      ? '⚠️ TRICK ROUND — trust the WORD, not its color!'
+      : `Pop all ${correctColor} balloons before time runs out.`;
+    if (twist) $('targetColor').classList.add('trick'); else $('targetColor').classList.remove('trick');
 
-      document.body.classList.add("twist-flash");
-      setTimeout(() => document.body.classList.remove("twist-flash"), 800);
-
-      if (Math.random() < 0.3) targetColor.style.transform = "scaleX(-1)";
-      else targetColor.style.transform = "scaleX(1)";
-    } else {
-      fontColor = correctColor;
-      targetColor.style.transform = "scaleX(1)";
+    const count = Math.min(32, 18 + level * 2 + Math.floor(round / 3));
+    targetRemaining = 0;
+    for (let i = 0; i < count; i++) {
+      let color = colors[Math.floor(Math.random() * colors.length)];
+      if (i === 0) color = correctColor;
+      const b = document.createElement('button');
+      b.className = 'balloon';
+      b.setAttribute('aria-label', `${color} balloon`);
+      b.style.background = `radial-gradient(circle at 30% 25%, #fff9, transparent 18%), ${colorHex[color]}`;
+      b.style.left = `${4 + Math.random() * 88}%`;
+      b.style.top = `${4 + Math.random() * 82}%`;
+      b.style.animationDelay = `${Math.random() * -2}s`;
+      if (color === correctColor) targetRemaining++;
+      b.addEventListener('click', () => popBalloon(b, color));
+      container.appendChild(b);
     }
 
-    targetColor.textContent = correctColor.toUpperCase();
-    targetColor.style.color = fontColor;
-
-    const w = balloonContainer.offsetWidth || 600;
-    const h = balloonContainer.offsetHeight || 400;
-
-    // --- Spawn balloons ---
-    remainingTargetBalloons = 0;
-    const spawnCount = totalBalloons || 20;
-
-    for (let i = 0; i < spawnCount; i++) {
-      const color = colors[Math.floor(Math.random() * colors.length)];
-      const balloon = document.createElement("div");
-      balloon.classList.add("balloon");
-      balloon.style.background = color;
-      balloon.style.position = "absolute";
-      balloon.style.left = Math.random() * (w - 60) + "px";
-      balloon.style.top = Math.random() * (h - 60) + "px";
-
-      if (color === correctColor) remainingTargetBalloons++;
-
-      // move some balloons in twist rounds
-      if (twistRound && Math.random() < 0.3) {
-        const moveX = (Math.random() - 0.5) * 40;
-        const moveY = (Math.random() - 0.5) * 40;
-        balloon.animate(
-          [
-            { transform: "translate(0,0)" },
-            { transform: `translate(${moveX}px, ${moveY}px)` },
-            { transform: "translate(0,0)" }
-          ],
-          { duration: 1200 + Math.random() * 1000, iterations: Infinity }
-        );
-      }
-
-      balloon.onclick = (e) => popBalloon(e.target, color);
-      balloonContainer.appendChild(balloon);
-    }
-
-    if (scoreDisplay) scoreDisplay.textContent = score;
-  }
-
-  // ---------- Timer ----------
-  function startTimer() {
-    clearInterval(interval);
-    let timeLeft = timer;
-
-    if (timerBar) {
-      timerBar.style.transition = "none";
-      timerBar.style.width = "100%";
-      setTimeout(() => {
-        timerBar.style.transition = `width ${timeLeft}s linear`;
-        timerBar.style.width = "0%";
-      }, 50);
-    }
-
+    timerSeconds = Math.max(4, 8 - Math.floor((level - 1) / 2));
+    timeLeft = timerSeconds;
+    updateTimer();
     interval = setInterval(() => {
-      timeLeft--;
-
-      if (timeLeft <= 0) {
-        clearInterval(interval);
-
-        // ❌ If not all target balloons popped -> Game Over
-        if (remainingTargetBalloons > 0) {
-          alert(
-            `⏰ Time’s up! You didn’t pop all the ${correctColor.toUpperCase()} balloons!`
-          );
-          gameOver();
-        } else {
-          round++;
-          startRound();
-        }
-      }
-    }, 1000);
+      if (paused || frozen) return;
+      timeLeft -= 0.1;
+      updateTimer();
+      if (timeLeft <= 0) finishRoundByTimeout();
+    }, 100);
+    syncHUD();
   }
 
-  // ---------- Pop logic ----------
+  function updateTimer() {
+    const pct = Math.max(0, timeLeft / timerSeconds * 100);
+    $('timerBar').style.width = `${pct}%`;
+    $('timerContainer').classList.toggle('danger', pct < 30);
+  }
+
   function popBalloon(el, color) {
-    if (!gameActive || !el) return;
-
-    if (color === correctColor) {
-      score += 10;
-      if (scoreDisplay) scoreDisplay.textContent = score;
-
-      remainingTargetBalloons--;
-      if (remainingTargetBalloons === 2) {
-        document.querySelectorAll(".balloon").forEach((b) => {
-          if (b.style.background === correctColor) b.classList.add("low-left");
-        });
-      }
-      el.classList.add("pop");
-      setTimeout(() => el.remove(), 300);
-
-      // remove popped balloon visually
-      el.style.transition = "opacity 0.25s, transform 0.25s";
-      el.style.opacity = "0";
-      el.style.transform = "scale(0)";
-      setTimeout(() => el.remove(), 250);
-
-      // if all correct balloons done -> next round
-      if (remainingTargetBalloons <= 0) {
-        clearInterval(interval);
-        round++;
-        setTimeout(startRound, 600);
+    if (!gameActive || paused || el.classList.contains('popped')) return;
+    if (color !== correctColor) {
+      el.classList.add('wrong');
+      if (shieldActive) {
+        shieldActive = false;
+        toast('🛡️ Shield saved you!', 'good');
+        setTimeout(() => el.classList.remove('wrong'), 350);
         return;
       }
-
-      // badges
-      if ([150, 300, 500, 1000, 1500].includes(score))
-        alert("🏅 You earned a new badge!");
-    } else {
-      gameOver();
+      lives--;
+      streak = 0;
+      comboMultiplier = 1;
+      toast(`💥 Wrong color! ${lives} lives left`, 'bad');
+      el.classList.add('shake');
+      if (lives <= 0) return gameOver('Out of lives!');
+      syncHUD();
+      setTimeout(() => el.classList.remove('wrong','shake'), 400);
+      return;
     }
-  }
 
-  // ---------- Game Over ----------
-  function gameOver() {
-    gameActive = false;
-    clearInterval(interval);
-    alert(`❌ Wrong color or missed target! Final Score: ${score}`);
-    window.location.href = "index.html";
-  }
+    el.classList.add('popped');
+    const points = 10 * comboMultiplier * (doublePoints ? 2 : 1);
+    score += points;
+    streak++;
+    bestStreak = Math.max(bestStreak, streak);
+    comboMultiplier = Math.min(5, 1 + Math.floor(streak / 5));
+    targetRemaining--;
+    syncHUD();
+    burst(el, colorHex[color]);
+    setTimeout(() => el.remove(), 220);
 
-  // ---------- Global buttons ----------
-  window.viewBadges = function () {
-    alert(
-      "🏅 Your Badges: " +
-        (score >= 1500
-          ? "Master, Diamond, Platinum, Gold, Silver, Bronze"
-          : score >= 1000
-          ? "Diamond, Platinum, Gold, Silver, Bronze"
-          : score >= 500
-          ? "Platinum, Gold, Silver, Bronze"
-          : score >= 300
-          ? "Gold, Silver, Bronze"
-          : score >= 150
-          ? "Bronze"
-          : "None yet!")
-    );
-  };
+    if (streak > 0 && streak % 5 === 0) toast(`🔥 ${streak} STREAK! ${comboMultiplier}X COMBO`, 'good');
+    if ([100, 250, 500, 1000, 2500].includes(score)) unlockBadge(`score-${score}`);
 
-  window.exitGame = function () {
-    if (confirm("Exit game and lose progress?")) {
+    if (targetRemaining <= 0) {
       clearInterval(interval);
-      gameActive = false;
-      window.location.href = "index.html";
+      const bonus = Math.ceil(timeLeft * 5) + comboMultiplier * 10;
+      score += bonus;
+      if (score > highScore) {
+        highScore = score;
+        localStorage.setItem('rainbowPopHighScore', highScore);
+      }
+      if (round % 3 === 0) toast(`✨ Round cleared! +${bonus} bonus`, 'good');
+      round++;
+      if (round > 5 && round % 5 === 1) {
+        level++;
+        lives = Math.min(3, lives + 1);
+        toast(`🚀 LEVEL ${level}! +1 LIFE`, 'level');
+        unlockBadge(`level-${level}`);
+      }
+      syncHUD();
+      nextRoundTimer = setTimeout(startRound, 900);
     }
+  }
+
+  function finishRoundByTimeout() {
+    clearInterval(interval);
+    if (targetRemaining > 0) {
+      lives--;
+      streak = 0;
+      comboMultiplier = 1;
+      toast(`⏰ Time's up! ${lives} lives left`, 'bad');
+      if (lives <= 0) return gameOver('Time ran out!');
+      syncHUD();
+      nextRoundTimer = setTimeout(startRound, 900);
+    }
+  }
+
+  function burst(el, color) {
+    const r = el.getBoundingClientRect();
+    for (let i = 0; i < 7; i++) {
+      const p = document.createElement('span');
+      p.className = 'particle';
+      p.style.left = `${r.left + r.width / 2}px`;
+      p.style.top = `${r.top + r.height / 2}px`;
+      p.style.background = color;
+      p.style.setProperty('--dx', `${(Math.random() - .5) * 100}px`);
+      p.style.setProperty('--dy', `${(Math.random() - .5) * 100}px`);
+      document.body.appendChild(p);
+      setTimeout(() => p.remove(), 650);
+    }
+  }
+
+  function unlockBadge(id) {
+    if (badges.includes(id)) return;
+    badges.push(id);
+    localStorage.setItem('rainbowPopBadges', JSON.stringify(badges));
+    toast('🏅 NEW BADGE UNLOCKED!', 'badge');
+  }
+
+  window.viewBadges = () => {
+    const labels = badges.map(b => ({'score-100':'🌟 100 Club','score-250':'💎 250 Popper','score-500':'👑 500 Master','score-1000':'🏆 1000 Legend','score-2500':'🌈 Rainbow God','level-2':'🚀 Level 2','level-3':'⚡ Level 3'}[b] || b));
+    toast(labels.length ? labels.join(' • ') : '🏅 No badges yet — keep popping!', 'badge');
   };
 
-  // ---------- Init ----------
-  window.addEventListener("load", () => {
-    gameActive = true;
-    if (scoreDisplay) scoreDisplay.textContent = score;
+  window.usePowerUp = type => {
+    if (!gameActive || paused || powerups[type] <= 0) return toast('Power-up unavailable!', 'bad');
+    powerups[type]--;
+    if (type === 'freeze') {
+      frozen = true; toast('❄️ TIME FROZEN!', 'good');
+      setTimeout(() => { frozen = false; toast('▶️ Time resumed'); }, 3000);
+    }
+    if (type === 'double') {
+      doublePoints = true; toast('⚡ DOUBLE POINTS!', 'good');
+      setTimeout(() => doublePoints = false, 6000);
+    }
+    if (type === 'shield') { shieldActive = true; toast('🛡️ SHIELD ACTIVE!', 'good'); }
+    syncHUD();
+  };
+
+  window.togglePause = () => {
+    if (!gameActive) return;
+    paused = !paused;
+    $('pauseOverlay').classList.toggle('hidden', !paused);
+    $('pauseBtn').textContent = paused ? '▶️' : '⏸️';
+  };
+
+  window.restartGame = () => {
+    clearInterval(interval); clearTimeout(nextRoundTimer);
+    score = 0; round = 1; level = 1; lives = 3; streak = 0; bestStreak = 0; comboMultiplier = 1;
+    powerups = { freeze: 2, double: 2, shield: 1 };
+    paused = false; gameActive = true; frozen = false; doublePoints = false; shieldActive = false;
+    $('gameOverOverlay').classList.add('hidden'); $('pauseOverlay').classList.add('hidden');
     startRound();
-  });
-
-  window.__ColorPopDebug = {
-    getState: () => ({ score, round, timer, totalBalloons, correctColor, remainingTargetBalloons })
   };
+
+  function gameOver(reason) {
+    gameActive = false; clearInterval(interval); clearTimeout(nextRoundTimer);
+    highScore = Math.max(highScore, score);
+    localStorage.setItem('rainbowPopHighScore', highScore);
+    $('gameOverTitle').textContent = score >= highScore ? '🏆 NEW HIGH SCORE!' : '🌈 Great Run!';
+    $('finalMessage').textContent = `${reason} You reached round ${round}.`;
+    $('finalScore').textContent = score;
+    $('finalStreak').textContent = bestStreak;
+    $('finalLevel').textContent = level;
+    $('gameOverOverlay').classList.remove('hidden');
+    syncHUD();
+  }
+
+  window.exitGame = () => { window.location.href = 'index.html'; };
+
+  window.addEventListener('load', () => {
+    syncHUD();
+    $('loadingScreen').style.display = 'flex';
+    setTimeout(() => { $('loadingScreen').style.display = 'none'; startRound(); }, 900);
+  });
 })();
