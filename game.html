@@ -3,27 +3,66 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Play - Color Pop Challenge</title>
+  <title>Play - Rainbow Pop</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body class="game-screen">
-  <div class="top-bar">
-    <div id="timerContainer">
-  <div id="timerBar"></div>
-</div>
+  <header class="top-bar">
+    <div class="hud-group">
+      <div class="hud-pill">⭐ <span id="score">0</span></div>
+      <div class="hud-pill">🔥 <span id="streak">0</span>x</div>
+      <div class="hud-pill">❤️ <span id="lives">3</span></div>
+      <div class="hud-pill">🏆 <span id="highScore">0</span></div>
+    </div>
+    <div class="hud-group">
+      <div class="hud-pill">Lv <span id="level">1</span></div>
+      <button id="pauseBtn" class="icon-btn" onclick="togglePause()">⏸️</button>
+      <button id="viewBadgesBtn" class="gold-btn" onclick="viewBadges()">🏅 Badges</button>
+    </div>
+  </header>
 
-    <div id="viewBadgesBtn" onclick="viewBadges()">🏅 View Badges</div>
+  <section class="challenge-panel">
+    <div class="round-label">ROUND <span id="round">1</span></div>
+    <h1 id="targetColor">GET READY!</h1>
+    <p id="challengeText">Pop every balloon matching the target color.</p>
+    <div id="timerContainer"><div id="timerBar"></div></div>
+  </section>
+
+  <main id="balloonContainer" aria-label="Rainbow Pop play area"></main>
+
+  <div id="powerupBar" class="powerup-bar">
+    <button class="power-btn" onclick="usePowerUp('freeze')">❄️ Freeze <span id="freezeCount">2</span></button>
+    <button class="power-btn" onclick="usePowerUp('double')">⚡ 2X <span id="doubleCount">2</span></button>
+    <button class="power-btn" onclick="usePowerUp('shield')">🛡️ Shield <span id="shieldCount">1</span></button>
   </div>
 
-  <h2 id="targetColor">Get Ready...</h2>
-  <div id="balloonContainer"></div>
+  <div id="messageToast" class="toast"></div>
 
-  <div id="scoreBoard">
-    <p>Score: <span id="score">0</span></p>
-    <button id="exitBtn" onclick="exitGame()">Exit Game</button>
+  <div id="pauseOverlay" class="modal hidden">
+    <div class="modal-card">
+      <h2>⏸️ Game Paused</h2>
+      <button onclick="togglePause()">▶️ Resume</button>
+      <button onclick="restartGame()">🔄 Restart</button>
+      <button onclick="exitGame()">🏠 Home</button>
+    </div>
   </div>
 
-  <div id="loadingScreen" class="loading">🎈 Loading balloons 🎈</div>
+  <div id="gameOverOverlay" class="modal hidden">
+    <div class="modal-card game-over-card">
+      <div class="result-emoji">🌈</div>
+      <h2 id="gameOverTitle">Amazing Run!</h2>
+      <p id="finalMessage"></p>
+      <div class="result-grid">
+        <div><span>Score</span><strong id="finalScore">0</strong></div>
+        <div><span>Best Streak</span><strong id="finalStreak">0</strong></div>
+        <div><span>Level</span><strong id="finalLevel">1</strong></div>
+      </div>
+      <button onclick="restartGame()">🚀 Play Again</button>
+      <button class="secondary-btn" onclick="exitGame()">🏠 Home</button>
+    </div>
+  </div>
+
+  <div id="loadingScreen" class="loading">🎈 GET READY... 🎈</div>
 
   <script src="script.js"></script>
 </body>
