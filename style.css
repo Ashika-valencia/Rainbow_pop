@@ -1,214 +1,65 @@
-/* 🌈 Common styling */
-body {
-  margin: 0;
-  font-family: "Poppins", sans-serif;
-  overflow: hidden;
-  color: #fff;
-  text-align: center;
-}
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap');
 
-/* 🎬 Start Screen */
-.start-screen {
-  background: url('https://i.pinimg.com/1200x/9a/c0/93/9ac09338b93d418781ed61ff8503d5a9.jpg') center/cover no-repeat;
-  height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
+* { box-sizing: border-box; }
+body { margin: 0; font-family: 'Fredoka', sans-serif; overflow: hidden; color: #fff; text-align: center; }
+button { font: inherit; border: 0; cursor: pointer; }
 
-.overlay {
-  background: rgba(0, 0, 0, 0.5);
-  padding: 50px;
-  border-radius: 20px;
-}
+.start-screen { min-height: 100vh; display: grid; place-items: center; background: radial-gradient(circle at 20% 20%, #ff70a6 0 8%, transparent 25%), radial-gradient(circle at 80% 25%, #ffd166 0 7%, transparent 24%), linear-gradient(135deg,#6c2bd9,#3a86ff 55%,#00c2a8); position: relative; }
+.start-screen::before { content:''; position:absolute; inset:0; background: repeating-linear-gradient(120deg,transparent 0 50px,#ffffff12 51px 53px); animation: drift 12s linear infinite; }
+.overlay { position:relative; z-index:1; width:min(92%,560px); padding:55px 35px; border:1px solid #ffffff55; border-radius:32px; background:#15132dcc; backdrop-filter:blur(18px); box-shadow:0 30px 80px #0005; }
+.game-title { font-size:clamp(2.5rem,8vw,4.8rem); margin:0 0 12px; text-shadow:0 8px 25px #0006; animation:bob 2s ease-in-out infinite; }
+.menu-buttons button { display:block; width:240px; margin:14px auto; padding:15px 22px; border-radius:16px; background:linear-gradient(135deg,#ff4d8d,#ff9f1c); color:white; font-weight:700; font-size:1.15rem; box-shadow:0 10px 25px #0004; transition:.2s; }
+.menu-buttons button:hover { transform:translateY(-4px) scale(1.03); box-shadow:0 16px 30px #0005; }
 
-.game-title {
-  font-size: 3em;
-  margin-bottom: 40px;
-}
+.game-screen { min-height:100vh; background:radial-gradient(circle at 50% 110%,#fff5c8,#c9f7ff 45%,#9c8cff); position:relative; }
+.game-screen::before { content:''; position:absolute; inset:0; pointer-events:none; background:linear-gradient(115deg,#ffffff25 1px,transparent 1px); background-size:45px 45px; opacity:.35; }
+.top-bar { position:relative; z-index:3; display:flex; justify-content:space-between; gap:12px; padding:14px 18px; flex-wrap:wrap; }
+.hud-group { display:flex; gap:8px; align-items:center; }
+.hud-pill,.gold-btn,.icon-btn { background:#18152ddd; color:#fff; border:1px solid #ffffff2a; border-radius:14px; padding:9px 13px; box-shadow:0 8px 20px #0002; font-weight:600; }
+.gold-btn { background:linear-gradient(135deg,#ffd166,#ff9f1c); color:#402000; }
+.icon-btn { min-width:44px; }
 
-.menu-buttons button {
-  display: block;
-  width: 200px;
-  margin: 10px auto;
-  padding: 15px;
-  font-size: 1.2em;
-  border: none;
-  border-radius: 10px;
-  background: linear-gradient(135deg, #ff0080, #ff8c00);
-  color: #fff;
-  cursor: pointer;
-  transition: 0.3s;
-}
+.challenge-panel { position:relative; z-index:2; width:min(92%,680px); margin:0 auto; padding:8px 18px 0; }
+.round-label { font-size:.8rem; letter-spacing:3px; color:#30255d; font-weight:700; }
+#targetColor { margin:4px 0 0; font-size:clamp(2rem,6vw,3.4rem); text-shadow:0 4px 12px #0002; transition:.2s; }
+#targetColor.trick { animation:trick .65s infinite alternate; }
+#challengeText { margin:2px 0 9px; color:#342c62; font-weight:500; }
+#timerContainer { height:12px; background:#ffffff99; border-radius:99px; overflow:hidden; box-shadow:inset 0 2px 5px #0002; }
+#timerBar { width:100%; height:100%; border-radius:99px; background:linear-gradient(90deg,#20c997,#3a86ff,#9b5de5); transition:width .1s linear; }
+#timerContainer.danger #timerBar { background:linear-gradient(90deg,#ff4d6d,#ff9f1c); }
 
-.menu-buttons button:hover {
-  transform: scale(1.1);
-}
+#balloonContainer { position:absolute; inset:175px 0 80px; overflow:hidden; z-index:1; }
+.balloon { position:absolute; width:clamp(46px,7vw,70px); aspect-ratio:.78; border-radius:50% 50% 45% 45%; box-shadow:inset -8px -10px 15px #0003,inset 8px 8px 15px #fff7,0 7px 15px #0003; transition:.16s; animation:float 2.6s ease-in-out infinite; }
+.balloon::before { content:''; position:absolute; width:15px; height:27px; left:20%; top:12%; border-radius:50%; background:#fff9; transform:rotate(25deg); }
+.balloon::after { content:''; position:absolute; width:2px; height:25px; left:50%; bottom:-22px; background:#5558; }
+.balloon:hover { transform:scale(1.13) rotate(-3deg); }
+.balloon.popped { animation:pop .22s forwards; pointer-events:none; }
+.balloon.wrong { filter:grayscale(.7); }
+.balloon.shake { animation:shake .35s; }
 
-/* 🕹️ Game Screen */
-.game-screen {
-  background: linear-gradient(180deg, #b3ecff, #e6f7ff);
-  height: 100vh;
-  overflow: hidden;
-}
+.powerup-bar { position:absolute; z-index:4; bottom:13px; left:50%; transform:translateX(-50%); display:flex; gap:8px; }
+.power-btn { padding:9px 12px; border-radius:13px; background:#18152ddd; color:white; border:1px solid #ffffff2a; box-shadow:0 7px 18px #0003; }
+.power-btn:hover { transform:translateY(-2px); }
+.toast { position:fixed; z-index:20; top:18%; left:50%; transform:translate(-50%,-20px) scale(.9); opacity:0; pointer-events:none; padding:12px 20px; border-radius:18px; background:#17142eea; box-shadow:0 12px 30px #0004; transition:.25s; font-weight:700; }
+.toast.show { opacity:1; transform:translate(-50%,0) scale(1); }
+.toast.good,.toast.level { border:1px solid #20c997; }.toast.bad { border:1px solid #ff4d6d; }.toast.badge { border:1px solid #ffd166; }
 
-.top-bar {
-  display: flex;
-  justify-content: space-between;
-  padding: 15px 30px;
-  font-size: 1.5em;
-  color: #222;
-}
+.modal { position:fixed; z-index:30; inset:0; display:grid; place-items:center; background:#09051a99; backdrop-filter:blur(8px); }
+.hidden { display:none; }
+.modal-card { width:min(90%,430px); padding:30px; border-radius:28px; background:#19152df5; border:1px solid #ffffff25; box-shadow:0 30px 80px #0007; }
+.modal-card h2 { font-size:2rem; margin-top:0; }
+.modal-card button { width:100%; margin:7px 0; padding:13px; border-radius:14px; background:linear-gradient(135deg,#ff4d8d,#9b5de5); color:white; font-weight:700; }
+.modal-card .secondary-btn { background:#ffffff18; }
+.result-emoji { font-size:3rem; }.result-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin:20px 0; }.result-grid div { background:#ffffff10; border-radius:14px; padding:12px 5px; }.result-grid span,.result-grid strong { display:block; }.result-grid span { font-size:.75rem; color:#bbb; }.result-grid strong { font-size:1.5rem; margin-top:4px; }
+.loading { position:fixed; z-index:40; inset:0; display:flex; align-items:center; justify-content:center; background:#111027f2; color:white; font-size:2rem; }
+.particle { position:fixed; z-index:50; width:9px; height:9px; border-radius:50%; pointer-events:none; animation:particle .6s ease-out forwards; }
 
-#viewBadgesBtn {
-  background: #ffcc00;
-  padding: 10px 20px;
-  border-radius: 12px;
-  cursor: pointer;
-  font-weight: bold;
-}
+@keyframes float { 0%,100%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY(-10px) rotate(2deg)} }
+@keyframes pop { to{transform:scale(1.8) rotate(20deg);opacity:0} }
+@keyframes particle { to{transform:translate(var(--dx),var(--dy)) scale(0);opacity:0} }
+@keyframes shake { 25%{transform:translateX(-7px)}50%{transform:translateX(7px)}75%{transform:translateX(-4px)} }
+@keyframes trick { from{transform:scale(1)}to{transform:scale(1.04) rotate(-1deg)} }
+@keyframes bob { 50%{transform:translateY(-8px)} }
+@keyframes drift { to{background-position:300px 300px} }
 
-#viewBadgesBtn:hover {
-  background: #ffaa00;
-}
-
-#targetColor {
-  margin-top: 20px;
-  font-size: 2em;
-  color: #444;
-}
-
-#balloonContainer {
-  position: relative;
-  height: 70vh;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  align-items: flex-end;
-  gap: 15px;
-  padding: 20px;
-}
-
-.balloon {
-  width: 60px;
-  height: 80px;
-  border-radius: 50% 50% 45% 45%;
-  position: absolute;
-  cursor: pointer;
-  box-shadow: inset -6px -8px 12px rgba(0, 0, 0, 0.2),
-              inset 6px 8px 12px rgba(255, 255, 255, 0.5),
-              0 4px 8px rgba(0, 0, 0, 0.3);
-  transition: transform 0.2s ease, opacity 0.2s ease;
-}
-
-/* When you hover — balloon stretches a little */
-.balloon:hover {
-  transform: scale(1.1);
-}
-
-/* 🎈 Small reflective highlight to give “shine” */
-.balloon::before {
-  content: "";
-  position: absolute;
-  top: 15%;
-  left: 25%;
-  width: 15px;
-  height: 25px;
-  background: rgba(255, 255, 255, 0.6);
-  border-radius: 50%;
-  filter: blur(1px);
-}
-
-/* 🎀 String at bottom of balloon */
-.balloon::after {
-  content: "";
-  position: absolute;
-  bottom: -20px;
-  left: 50%;
-  width: 2px;
-  height: 25px;
-  background: rgba(80, 80, 80, 0.6);
-  transform: translateX(-50%);
-}
-
-/* 💨 Gentle floating animation */
-@keyframes floaty {
-  0% { transform: translateY(0) rotate(0deg); }
-  50% { transform: translateY(-6px) rotate(1deg); }
-  100% { transform: translateY(0) rotate(0deg); }
-}
-.balloon {
-  animation: floaty 2.5s ease-in-out infinite;
-}
-
-/* 🧮 Score board */
-#scoreBoard {
-  position: absolute;
-  bottom: 10px;
-  left: 20px;
-  font-size: 1.4em;
-  color: #333;
-}
-
-#exitBtn {
-  background: #ff4d4d;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  margin-top: 10px;
-  border-radius: 10px;
-  cursor: pointer;
-}
-
-#exitBtn:hover {
-  background: #cc0000;
-}
-
-/* ⏳ Loading Screen */
-.loading {
-  display: none;
-  position: absolute;
-  inset: 0;
-  background: rgba(255,255,255,0.8);
-  color: #333;
-  font-size: 2em;
-  align-items: center;
-  justify-content: center;
-}
-#timerContainer {
-  width: 100%;
-  height: 10px;
-  background: #ddd;
-  border-radius: 10px;
-  overflow: hidden;
-  margin-top: 10px;
-}
-
-#timerBar {
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, #4caf50, #81c784);
-  border-radius: 10px;
-}
-.twist-flash {
-  background-color: rgba(255, 0, 0, 0.1);
-  transition: background-color 0.5s ease;
-}
-@keyframes pulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.1); }
-  100% { transform: scale(1); }
-}
-
-.balloon.low-left {
-  animation: pulse 0.5s infinite;
-  box-shadow: 0 0 8px 2px gold;
-}
-.balloon.pop {
-  animation: pop 0.3s forwards;
-}
-
-@keyframes pop {
-  0% { transform: scale(1); opacity: 1; }
-  100% { transform: scale(1.6); opacity: 0; }
-}
+@media(max-width:650px){ .top-bar{padding:9px}.hud-pill{padding:7px 9px;font-size:.85rem}.gold-btn{display:none} #balloonContainer{inset:165px 0 85px}.powerup-bar{width:96%;justify-content:center}.power-btn{font-size:.75rem;padding:8px 9px}.challenge-panel{padding-top:0} }
