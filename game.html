@@ -3,67 +3,66 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Play - Rainbow Pop</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta name="theme-color" content="#5b21b6" />
+  <title>Rainbow Pop — Arcade</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css?v=4" />
 </head>
 <body class="game-screen">
+  <div class="aurora aurora-a"></div><div class="aurora aurora-b"></div><div class="stars"></div>
+
   <header class="top-bar">
+    <div class="brand"><span class="brand-orb">🌈</span><div><strong>RAINBOW POP</strong><small>ARCADE MODE</small></div></div>
     <div class="hud-group">
-      <div class="hud-pill">⭐ <span id="score">0</span></div>
-      <div class="hud-pill">🔥 <span id="streak">0</span>x</div>
-      <div class="hud-pill">❤️ <span id="lives">3</span></div>
-      <div class="hud-pill">🏆 <span id="highScore">0</span></div>
+      <div class="hud-pill score-pill"><span>⭐</span><small>SCORE</small><strong id="score">0</strong></div>
+      <div class="hud-pill combo-pill"><span>🔥</span><small>COMBO</small><strong id="streak">0</strong><em>x</em></div>
+      <div class="hud-pill lives-pill"><span>❤️</span><small>LIVES</small><strong id="lives">3</strong></div>
+      <div class="hud-pill best-pill"><span>🏆</span><small>BEST</small><strong id="highScore">0</strong></div>
     </div>
-    <div class="hud-group">
-      <div class="hud-pill">Lv <span id="level">1</span></div>
-      <button id="pauseBtn" class="icon-btn" onclick="togglePause()">⏸️</button>
-      <button id="viewBadgesBtn" class="gold-btn" onclick="viewBadges()">🏅 Badges</button>
+    <div class="hud-actions">
+      <div class="level-badge"><span>LEVEL</span><strong id="level">1</strong></div>
+      <button class="icon-btn" onclick="togglePause()" aria-label="Pause">⏸</button>
+      <button class="gold-btn" onclick="viewBadges()">🏅 BADGES</button>
     </div>
   </header>
 
   <section class="challenge-panel">
-    <div class="round-label">ROUND <span id="round">1</span></div>
+    <div class="challenge-topline"><span class="round-label">ROUND <b id="round">1</b></span><span id="challengeTag" class="challenge-tag">NORMAL</span></div>
     <h1 id="targetColor">GET READY!</h1>
-    <p id="challengeText">Pop every balloon matching the target color.</p>
-    <div id="timerContainer"><div id="timerBar"></div></div>
+    <p id="challengeText">Pop every balloon matching the target.</p>
+    <div class="objective-row"><span id="objectiveText">TARGETS</span><strong><span id="targetProgress">0</span>/<span id="targetTotal">0</span></strong></div>
+    <div id="timerContainer"><div id="timerBar"></div><span id="timerText">8.0s</span></div>
   </section>
 
   <main id="balloonContainer" aria-label="Rainbow Pop play area"></main>
 
-  <div id="powerupBar" class="powerup-bar">
-    <button class="power-btn" onclick="usePowerUp('freeze')">❄️ Freeze <span id="freezeCount">2</span></button>
-    <button class="power-btn" onclick="usePowerUp('double')">⚡ 2X <span id="doubleCount">2</span></button>
-    <button class="power-btn" onclick="usePowerUp('shield')">🛡️ Shield <span id="shieldCount">1</span></button>
+  <div class="bottom-dock">
+    <div class="powerup-label">⚡ POWER-UPS</div>
+    <div class="powerup-bar">
+      <button class="power-btn freeze" onclick="usePowerUp('freeze')"><span class="power-icon">❄️</span><span><b>FREEZE</b><small>3 sec</small></span><strong id="freezeCount">2</strong></button>
+      <button class="power-btn double" onclick="usePowerUp('double')"><span class="power-icon">⚡</span><span><b>2X SCORE</b><small>6 sec</small></span><strong id="doubleCount">2</strong></button>
+      <button class="power-btn shield" onclick="usePowerUp('shield')"><span class="power-icon">🛡️</span><span><b>SHIELD</b><small>1 miss</small></span><strong id="shieldCount">1</strong></button>
+    </div>
   </div>
 
   <div id="messageToast" class="toast"></div>
+  <div id="comboBurst" class="combo-burst"></div>
 
-  <div id="pauseOverlay" class="modal hidden">
-    <div class="modal-card">
-      <h2>⏸️ Game Paused</h2>
-      <button onclick="togglePause()">▶️ Resume</button>
-      <button onclick="restartGame()">🔄 Restart</button>
-      <button onclick="exitGame()">🏠 Home</button>
-    </div>
-  </div>
+  <div id="pauseOverlay" class="modal hidden"><div class="modal-card glass-card">
+    <div class="modal-icon">⏸️</div><h2>GAME PAUSED</h2><p>Take a breath. Your run is safe.</p>
+    <button onclick="togglePause()">▶️ RESUME</button><button onclick="restartGame()">🔄 RESTART</button><button class="secondary-btn" onclick="exitGame()">🏠 HOME</button>
+  </div></div>
 
-  <div id="gameOverOverlay" class="modal hidden">
-    <div class="modal-card game-over-card">
-      <div class="result-emoji">🌈</div>
-      <h2 id="gameOverTitle">Amazing Run!</h2>
-      <p id="finalMessage"></p>
-      <div class="result-grid">
-        <div><span>Score</span><strong id="finalScore">0</strong></div>
-        <div><span>Best Streak</span><strong id="finalStreak">0</strong></div>
-        <div><span>Level</span><strong id="finalLevel">1</strong></div>
-      </div>
-      <button onclick="restartGame()">🚀 Play Again</button>
-      <button class="secondary-btn" onclick="exitGame()">🏠 Home</button>
-    </div>
-  </div>
+  <div id="gameOverOverlay" class="modal hidden"><div class="modal-card game-over-card glass-card">
+    <div class="result-emoji">🌈</div><div class="result-kicker">RUN COMPLETE</div><h2 id="gameOverTitle">AMAZING RUN!</h2><p id="finalMessage"></p>
+    <div class="result-grid"><div><span>⭐ SCORE</span><strong id="finalScore">0</strong></div><div><span>🔥 BEST COMBO</span><strong id="finalStreak">0</strong></div><div><span>🚀 LEVEL</span><strong id="finalLevel">1</strong></div></div>
+    <div id="resultBadge" class="result-badge"></div>
+    <button onclick="restartGame()">🚀 PLAY AGAIN</button><button class="secondary-btn" onclick="exitGame()">🏠 HOME</button>
+  </div></div>
 
-  <div id="loadingScreen" class="loading">🎈 GET READY... 🎈</div>
-
-  <script src="script.js"></script>
+  <div id="loadingScreen" class="loading"><div class="loader-orb">🌈</div><h2>RAINBOW POP</h2><p>GET READY...</p><div class="loader-line"><i></i></div></div>
+  <script src="script.js?v=4"></script>
 </body>
 </html>
