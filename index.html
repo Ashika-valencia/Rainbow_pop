@@ -3,34 +3,25 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Color Pop Challenge</title>
+  <title>Rainbow Pop — Color Challenge</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body class="start-screen">
   <div class="overlay">
-    <h1 class="game-title">🎈 RAINBOW POP! 🎨</h1>
+    <div style="font-size:1rem;letter-spacing:4px;opacity:.8">THE ULTIMATE COLOR REFLEX GAME</div>
+    <h1 class="game-title">🌈 RAINBOW POP!</h1>
+    <p style="font-size:1.1rem;opacity:.9">Pop the right colors. Build your combo. Beat your best.</p>
     <div class="menu-buttons">
-      <button onclick="startGame()">Start Game</button>
-      <button onclick="exitGame()">Exit</button>
+      <button onclick="startGame()">🚀 START GAME</button>
+      <button onclick="showHowToPlay()">🎯 HOW TO PLAY</button>
+      <button onclick="showStats()">🏆 MY STATS</button>
     </div>
+    <div id="homeInfo" style="min-height:24px;margin-top:16px;opacity:.85"></div>
   </div>
-
   <script>
-    function startGame() {
-      window.location.href = "game.html";
-    }
-
-    function viewBadges() {
-      alert("🏅 Badges will appear after you play and score high!");
-    }
-
-    function exitGame() {
-      if (confirm("Are you sure you want to exit the game?")) {
-        window.close();
-      }
-    }
-    
+    function startGame(){ window.location.href='game.html'; }
+    function showHowToPlay(){ document.getElementById('homeInfo').textContent='🎈 Pop only the target color • ❤️ 3 lives • 🔥 Build streaks • ⚡ Use power-ups • 🚀 Survive harder levels!'; }
+    function showStats(){ const score=localStorage.getItem('rainbowPopHighScore')||0; const badges=JSON.parse(localStorage.getItem('rainbowPopBadges')||'[]').length; document.getElementById('homeInfo').textContent=`🏆 Best Score: ${score}  •  🏅 Badges: ${badges}`; }
   </script>
-  
 </body>
 </html>
