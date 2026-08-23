@@ -1,1 +1,48 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><meta name="theme-color" content="#f58bb7"><title>Rainbow Pop — Color Challenge</title><link rel="stylesheet" href="style.css?v=6"></head><body class="start-screen"><div class="home-shell"><section class="home-copy"><div class="eyebrow">✦ A LITTLE COLOR. A LOT OF FUN.</div><h1 class="game-title">🌈<br>RAINBOW<br>POP!</h1><p>Find the right color, build your streak, and see how far your reflexes can take you.</p><div class="home-buttons"><button class="primary-home" onclick="startGame()">✦ START PLAYING</button><button class="soft-home" onclick="showHowToPlay()">♡ HOW TO PLAY</button><button class="soft-home" onclick="showStats()">♧ MY STATS</button></div><div id="homeInfo" class="home-info"></div></section><section class="home-card" aria-label="Rainbow Pop preview"><div class="rainbow-arc"></div><div class="cute-balloon b1"></div><div class="cute-balloon b2"></div><div class="cute-balloon b3"></div><div class="cute-balloon b4"></div><div class="home-feature"><div class="feature"><strong>♡ 3 LIVES</strong><span>mistakes are okay</span></div><div class="feature"><strong>✦ COMBOS</strong><span>keep your streak alive</span></div><div class="feature"><strong>⚡ POWER-UPS</strong><span>play it your way</span></div></div></section></div><script>function startGame(){window.location.href='game.html'}function showHowToPlay(){document.getElementById('homeInfo').textContent='🎈 Pop only the target color • ❤️ You have 3 lives • 🔥 Build combos • ⚡ Save power-ups for tricky rounds • ⏱️ The pace starts gentle and gets harder.'}function showStats(){const score=localStorage.getItem('rainbowPopHighScore')||0;const badges=JSON.parse(localStorage.getItem('rainbowPopBadges')||'[]').length;document.getElementById('homeInfo').textContent=`✦ Best score ${score}  •  🏅 ${badges} badge${badges===1?'':'s'} unlocked`}</script></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#f7d7e8">
+  <title>Rainbow Pop</title>
+  <link rel="stylesheet" href="style.css?v=7">
+</head>
+<body class="start-screen">
+  <main class="simple-home">
+    <div class="soft-glow glow-one"></div>
+    <div class="soft-glow glow-two"></div>
+    <div class="mini-sparkles">✦　˚　♡　✧　˚　✦</div>
+
+    <section class="welcome-card">
+      <div class="mini-rainbow">🌈</div>
+      <div class="eyebrow">A LITTLE COLOR, A LOT OF FUN</div>
+      <h1 class="simple-title">Rainbow Pop</h1>
+      <p class="simple-subtitle">Pop the right colors.<br>Build your streak. ✨</p>
+
+      <div class="simple-preview">
+        <span class="preview-balloon pb-pink">♡</span>
+        <span class="preview-balloon pb-lav">✦</span>
+        <span class="preview-balloon pb-mint">♡</span>
+        <span class="preview-balloon pb-yellow">✦</span>
+      </div>
+
+      <button class="play-button" onclick="startGame()">✦ Play Now</button>
+      <button class="how-button" onclick="showHowToPlay()">How to play</button>
+      <p id="homeInfo" class="home-info"></p>
+    </section>
+
+    <div class="tiny-note">♡ 3 lives　•　✦ combos　•　⚡ power-ups</div>
+  </main>
+
+  <script>
+    function startGame() {
+      window.location.href = 'game.html';
+    }
+
+    function showHowToPlay() {
+      document.getElementById('homeInfo').textContent =
+        'Pop only the target color • wrong pops cost a life • keep your streak alive ✨';
+    }
+  </script>
+</body>
+</html>
